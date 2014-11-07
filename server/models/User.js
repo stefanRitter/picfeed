@@ -10,7 +10,9 @@ schema = mongoose.Schema({
     index: true
   },
   username: String,
-  displayName: String
+  displayName: String,
+  token: String,
+  secret: String
 });
 
 module.exports = mongoose.model('User', schema);

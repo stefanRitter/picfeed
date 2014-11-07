@@ -2,6 +2,8 @@
 
 module.exports = function (config, server) {
   require('../controllers/auth.js')(server);
+  
+  require('../controllers/twitter.js')(server);
 
   server.route({
     method: 'GET',

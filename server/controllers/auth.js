@@ -15,7 +15,9 @@ function loginTwitter (request, reply) {
       var userToCreate = {
         id: userData.id,
         username: userData.username,
-        displayName: userData.displayName
+        displayName: userData.displayName,
+        token: userData.token,
+        secret: userData.secret
       };
       return User.create(userToCreate, function (err, newUser) {
         if (err || !newUser) { return reply(Boom.badImplementation(err)); }
