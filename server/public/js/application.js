@@ -381,15 +381,14 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   vm.loadingText = 'fetching tweets...';
   
   socket.on('tweet', function (tweet) {
-    console.log('new tweet');
     vm.tweets.unshift(tweet);
     $rootScope.$emit('newTweet');
+    $rootScope.$digest();
   });
 
   socket.on('tweets', function (tweets) {
     vm.tweets = vm.tweets.concat(tweets);
-    $rootScope.$emit('newTweet');
-    //$rootScope.$digest();
+    $rootScope.$digest();
   });
 
   socket.on('errorMessage', function (error) {
