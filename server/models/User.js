@@ -21,16 +21,22 @@ schema = mongoose.Schema({
     profile_image_url:  String,
     text:               String,
     retweet_count:      Number,
-    favorite_count:     Number
+    favorite_count:     Number,
+    pics: [String]
   }]
 });
 
 function cleanTweet (rawTweet) {
+  var pics = rawTweet.extended_entities.media.map(function (e) {
+              if (e.type === 'photo') { return e.media_url; }
+             });
+
   return {
     profile_image_url:  rawTweet.user.profile_image_url,
     text:               rawTweet.text,
     retweet_count:      rawTweet.retweet_count  || 0,
-    favorite_count:     rawTweet.favorite_count || 0
+    favorite_count:     rawTweet.favorite_count || 0,
+    pics:               pics
   };
 }
 

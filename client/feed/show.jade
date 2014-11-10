@@ -6,3 +6,8 @@
 
   .margin-top-big(ng-hide="vm.tweets.length === 0")
     h1 Your Feed
+    
+    .tweet(ng-repeat="tweet in vm.tweets")
+      img(ng-repeat="pic in tweet.pics" src="{{pic}}")
+      | RT: {{tweet.retweet_count}}
+      | FAV: {{tweet.favorite_count}}
