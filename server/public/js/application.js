@@ -381,7 +381,7 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   vm.loadingText = 'fetching tweets...';
   
   socket.on('tweet', function (tweet) {
-    window.alert('new tweet');
+    console.log('new tweet');
     vm.tweets.unshift(tweet);
     $rootScope.$digest();
   });
@@ -399,4 +399,9 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   $rootScope.$on('userLoggedIn', function () {
     socket.emit('currentUser', currentUser.get());
   });
+
+  setTimeout(function () {
+    vm.loadingText = 'Wow, so many images! almost ready...';
+    $rootScope.$digest();
+  }, 8400/2);
 }]);
