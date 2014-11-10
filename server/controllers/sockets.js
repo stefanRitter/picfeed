@@ -8,7 +8,7 @@ module.exports = function (socket) {
   socket.on('currentUser', function (currentUser) {
     user = User.findOne({_id: currentUser._id}, function (err, foundUser) {
       if (err || !foundUser) { 
-        return socket.emit('error', {error: 'error finding currentUser'});
+        return socket.emit('errorMessage', {error: 'error finding currentUser'});
       }
 
       user = foundUser;
