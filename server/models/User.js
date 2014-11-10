@@ -26,6 +26,7 @@ schema = mongoose.Schema({
   }]
 });
 
+// helpers
 function cleanTweet (rawTweet) {
   var pics = rawTweet.extended_entities.media.map(function (e) {
               if (e.type === 'photo') { return e.media_url; }
@@ -45,17 +46,15 @@ function filterPhotoTweets (tweet) {
 
   tweet.extended_entities = tweet.extended_entities || {};
   tweet.extended_entities.media = tweet.extended_entities.media || [];
-
   tweet.extended_entities.media.forEach(function (entity) {
-    if (entity.type === 'photo') {
-      hasPhoto = true;
-    }
+    if (entity.type === 'photo') { hasPhoto = true; }
   });
 
   return hasPhoto;
 }
 
 
+// REST API calls
 schema.methods.lookupOldTweets = function (socket) {
   var twit = new twitter({
       consumer_key: process.env.TWIT_KEY || 'empty',
@@ -74,19 +73,25 @@ schema.methods.lookupOldTweets = function (socket) {
       return socket.emit('errorMessage', {error: 'error with /statuses/user_timeline.json'});
     }
     
-    var photoTweets = data.filter(filterPhotoTweets);
+    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
     
     console.log('tweets found: ', data.length);
     console.log('tweets with pic: ', photoTweets.length);
 
-    socket.emit('tweet', cleanTweet(photoTweets[0]));
-  });
+    this.tweets = this.tweets.concat(photoTweets);
+
+    socket.emit('tweets', this.tweets);
+    this.save();
+
+  }.bind(this));
 };
 
 
 schema.methods.initFeed = function (socket) {
   if (this.tweets.length === 0) {
     this.lookupOldTweets(socket);
+  } else {
+    socket.emit('tweets', this.tweets);
   }
 };
 

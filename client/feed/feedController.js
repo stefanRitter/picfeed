@@ -7,8 +7,12 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   vm.tweets = [];
   
   socket.on('tweet', function (tweet) {
-    console.log(tweet);
     vm.tweets.push(tweet);
+    $rootScope.$digest();
+  });
+
+  socket.on('tweets', function (tweets) {
+    vm.tweets = vm.tweets.concat(tweets);
     $rootScope.$digest();
   });
 
