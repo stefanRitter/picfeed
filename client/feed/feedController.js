@@ -1,8 +1,7 @@
-angular.module('app').controller('feedController', [function () {
+angular.module('app').controller('feedController', ['$rootScope', 'currentUser', function ($rootScope, currentUser) {
   'use strict';
 
   // TODO: 
-  // 1. setup socket.io connection
   // 2. send user info
   // 3. push incoming tweets into array
 
@@ -15,8 +14,7 @@ angular.module('app').controller('feedController', [function () {
     console.log(message);
   });
 
-  socket.on('welcome', function (message) {
-    console.log(message);
-    socket.emit('ping', {});
+  $rootScope.$on('userLoggedIn', function () {
+    socket.emit('currentUser', currentUser.get());
   });
 }]);

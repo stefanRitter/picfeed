@@ -340,32 +340,41 @@ angular.module('app').config(function ($routeProvider, $locationProvider) {
 });
 
 
-angular.module('app').run(['$rootScope', '$location', '$http', function ($rootScope, $location, $http) {
+angular.module('app').run(['$rootScope', '$location', function ($rootScope, $location) {
   'use strict';
-  
-  if ($location.path() === '/') {
-    $http
-      .get('/session', {})
-      .error(function () {})
-      .success(function () {
-        $location.path('/feed');
-      });
-  }
 
   $rootScope.$on('$routeChangeSuccess', function(){
     window.ga('send', 'pageview', $location.path());
   });
 }]);
 
-angular.module('app').controller('loginController', [function () {
+angular.module('app').factory('currentUser', ['$location', '$http', '$rootScope', function ($location, $http, $rootScope) {
   'use strict';
+
+  var currentUser = {};
+
+  $http
+    .get('/session', {})
+    .error(function () {
+      $location.path('/');
+    })
+    .success(function (res) {
+      currentUser = res;
+      $rootScope.$emit('userLoggedIn');
+      $location.path('/feed');
+    });
+
+  return {
+    get: function () {
+      return currentUser;
+    }
+  };
 }]);
 
-angular.module('app').controller('feedController', [function () {
+angular.module('app').controller('feedController', ['$rootScope', 'currentUser', function ($rootScope, currentUser) {
   'use strict';
 
   // TODO: 
-  // 1. setup socket.io connection
   // 2. send user info
   // 3. push incoming tweets into array
 
@@ -378,8 +387,7 @@ angular.module('app').controller('feedController', [function () {
     console.log(message);
   });
 
-  socket.on('welcome', function (message) {
-    console.log(message);
-    socket.emit('ping', {});
+  $rootScope.$on('userLoggedIn', function () {
+    socket.emit('currentUser', currentUser.get());
   });
 }]);

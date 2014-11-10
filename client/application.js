@@ -20,17 +20,8 @@ angular.module('app').config(function ($routeProvider, $locationProvider) {
 });
 
 
-angular.module('app').run(['$rootScope', '$location', '$http', function ($rootScope, $location, $http) {
+angular.module('app').run(['$rootScope', '$location', function ($rootScope, $location) {
   'use strict';
-  
-  if ($location.path() === '/') {
-    $http
-      .get('/session', {})
-      .error(function () {})
-      .success(function () {
-        $location.path('/feed');
-      });
-  }
 
   $rootScope.$on('$routeChangeSuccess', function(){
     window.ga('send', 'pageview', $location.path());

@@ -8,8 +8,12 @@ module.exports = function (config, server) {
   io = socketIo(server.listener);
 
   var ioHandler = function (socket) {
-    // listen to user stream
-    console.log(socket);
+
+    socket.on('currentUser', function (currentUser) {
+      console.log(currentUser);
+      socket.emit('pong', currentUser);
+    });
+
   };
 
   io.on('connection', ioHandler);
