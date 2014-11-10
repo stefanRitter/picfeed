@@ -1,3 +1,8 @@
 .center(ng-controller="feedController as vm")  
-  .margin-top-big
+  
+  .margin-top-big(ng-show="vm.tweets.length === 0")
+    include ../common/spinner
+    em.blue fetching tweets...
+
+  .margin-top-big(ng-hide="vm.tweets.length === 0")
     h1 Your Feed

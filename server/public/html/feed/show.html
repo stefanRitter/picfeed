@@ -1,1 +1,1 @@
-<div ng-controller="feedController as vm" class="center"> <div class="margin-top-big"><h1>Your Feed</h1></div></div>
+<div ng-controller="feedController as vm" class="center"> <div ng-show="vm.tweets.length === 0" class="margin-top-big"><div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div><em class="blue">fetching tweets...</em></div><div ng-hide="vm.tweets.length === 0" class="margin-top-big"><h1>Your Feed</h1></div></div>

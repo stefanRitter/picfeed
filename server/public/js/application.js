@@ -374,17 +374,13 @@ angular.module('app').factory('currentUser', ['$location', '$http', '$rootScope'
 angular.module('app').controller('feedController', ['$rootScope', 'currentUser', function ($rootScope, currentUser) {
   'use strict';
 
-  // TODO: 
-  // 2. send user info
-  // 3. push incoming tweets into array
-
   var vm = this;
   var socket = window.io.connect();
 
   vm.tweets = [];
   
-  socket.on('pong', function (message) {
-    console.log(message);
+  socket.on('tweet', function (tweet) {
+    vm.tweets.push(tweet);
   });
 
   $rootScope.$on('userLoggedIn', function () {
