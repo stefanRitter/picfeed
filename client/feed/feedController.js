@@ -7,7 +7,12 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   vm.tweets = [];
   
   socket.on('tweet', function (tweet) {
+    console.log('new tweet', tweet);
     vm.tweets.push(tweet);
+  });
+
+  socket.on('error', function (error) {
+    window.alert('error occurred', error);
   });
 
   $rootScope.$on('userLoggedIn', function () {
