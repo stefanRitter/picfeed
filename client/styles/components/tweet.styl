@@ -1,13 +1,16 @@
 .tweets
   clear both
-  width 99%
+  width 96%
 
 .tweet
   float left
-  width 24%
-  margin 1% 0 0 1%
+  width 21%
+  margin 4% 0 0 4%
+  //box-shadow 0px 0px 5px 0px rgba(50, 50, 50, 0.75)
   @media phablet
-    width 49%
+    width 46%
+  @media phone
+    width 96%
 
 .tweet-images
   width 100%
@@ -19,3 +22,40 @@
   height 100%
   background-position center center
   background-size cover
+
+.tweet-info
+  padding 10px
+  border 2px solid Gray
+  border-top 0
+  border-bottom-right-radius 10px
+  border-bottom-left-radius 10px
+  overflow hidden
+
+.tweet-profile-pic
+  float left
+  border-radius 50%
+  width 10%
+
+.tweet-text
+  float left
+  width 88%
+  margin-left 2%
+  text-align left
+  height 3em
+  overflow hidden
+  color DarkGray
+
+.tweet-share-stats
+  clear both
+  padding-top 5px
+  color DarkGray
+  float right
+  text-align left
+  width 88%
+
+.tweet-retweets
+.tweet-likes
+  float left
+  width 50%
+  img
+    margin-right 5px

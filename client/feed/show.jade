@@ -5,12 +5,22 @@
     em.blue fetching tweets...
 
   div(ng-hide="vm.tweets.length === 0")
-    a.button.blue.pull-right.margin(href="/logout") logout
+    //a.totop-button.button.green(href="/logout") back to top
+    a.logout-button.button.red(href="/logout") log out
     
     .tweets
-      .tweet(ng-repeat="tweet in vm.tweets")
+      a.tweet(ng-repeat="tweet in vm.tweets" href="{{tweet.url}}" target="_blank")
         .tweet-images
           .tweet-image(ng-repeat="pic in tweet.pics" style="background-image:url({{pic}})")
         .tweet-info
-          | RT: {{tweet.retweet_count}}
-          | FAV: {{tweet.favorite_count}}
+          img.tweet-profile-pic(src="{{tweet.profile_image_url}}")
+          .tweet-text {{tweet.text}}
+          .tweet-share-stats
+            .tweet-retweets
+              img(src="/assets/img/rt.png")
+              | {{tweet.retweet_count}}
+            .tweet-likes
+              img(src="/assets/img/fav.png")
+              | {{tweet.favorite_count}}
+    
+    .clear-both.padding
