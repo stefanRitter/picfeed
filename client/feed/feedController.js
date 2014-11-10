@@ -10,12 +10,13 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   socket.on('tweet', function (tweet) {
     console.log('new tweet');
     vm.tweets.unshift(tweet);
-    $rootScope.$digest();
+    $rootScope.$emit('newTweet');
   });
 
   socket.on('tweets', function (tweets) {
     vm.tweets = vm.tweets.concat(tweets);
-    $rootScope.$digest();
+    $rootScope.$emit('newTweet');
+    //$rootScope.$digest();
   });
 
   socket.on('errorMessage', function (error) {

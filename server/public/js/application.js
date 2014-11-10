@@ -383,12 +383,13 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   socket.on('tweet', function (tweet) {
     console.log('new tweet');
     vm.tweets.unshift(tweet);
-    $rootScope.$digest();
+    $rootScope.$emit('newTweet');
   });
 
   socket.on('tweets', function (tweets) {
     vm.tweets = vm.tweets.concat(tweets);
-    $rootScope.$digest();
+    $rootScope.$emit('newTweet');
+    //$rootScope.$digest();
   });
 
   socket.on('errorMessage', function (error) {
@@ -404,4 +405,24 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
     vm.loadingText = 'Wow, so many images! almost ready...';
     $rootScope.$digest();
   }, 8400/2);
+}]);
+
+angular.module('app').directive('newTweetAlert', ['$rootScope', function ($rootScope) {
+  'use strict';
+
+  return {
+    restrict: 'A',
+    templateUrl: '/assets/html/feed/newTweetAlert',
+    replace: true,
+    scope: {},
+    
+    link: function ($scope) {
+      var vm = $scope;
+      vm.show = false;
+
+      $rootScope.$on('newTweet', function () {
+        vm.show = true;
+      });
+    }
+  };
 }]);
