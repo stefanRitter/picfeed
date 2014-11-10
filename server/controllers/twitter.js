@@ -19,7 +19,7 @@ function restTimeline (request, reply) {
   var userId = request.auth.credentials.id;
 
   twit.get('/statuses/user_timeline.json', {user_id: userId, include_entities:true}, function(data, res) {
-    if (res.statusCode !== 200) { return reply(Boom.badImplementation('twitter return code')); }
+    if (res.statusCode !== 200) { return reply(Boom.badImplementation('twitter code: '+res.statusCode)); }
 
     console.log('found: ', data.length);
     reply(data);
@@ -29,13 +29,15 @@ function restTimeline (request, reply) {
 module.exports = function (_server) {
   server = _server;
 
-  [{
+  [
+    {
       method: 'GET',
       path: '/twitter/timeline',
       config: {
         handler: restTimeline,
         auth: 'session'
       }
-    }]
+    }
+  ]
   .forEach(function (route) { server.route(route); });
 };
