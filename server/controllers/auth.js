@@ -19,6 +19,7 @@ function loginTwitter (request, reply) {
         token: userData.token,
         secret: userData.secret
       };
+
       return User.create(userToCreate, function (err, newUser) {
         if (err || !newUser) { return reply(Boom.badImplementation(err)); }
         request.auth.session.set({id: newUser.id});

@@ -12,6 +12,9 @@ var config = require('./config/config')[process.env.NODE_ENV],
 // setup datastore
 require('./config/mongoose.js')(config);
 
+// setup socket.io
+require('./config/socket.io.js')(config, server);
+
 // setup routes
 require('./config/routes.js')(config, server);
 
