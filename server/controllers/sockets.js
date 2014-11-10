@@ -12,8 +12,11 @@ module.exports = function (socket) {
       }
 
       user = foundUser;
-      socket.emit('tweet', {});
+      user.initFeed(socket);
     });
   });
 
+  socket.on('disconnect', function () {
+    user = undefined;
+  });
 };
