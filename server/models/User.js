@@ -66,15 +66,9 @@ function filterPhotoTweets (tweet) {
 }
 
 
-// REST API calls
-schema.methods.lookupOldTweets = function (socket) {
-  var twit = new twitter({
-      consumer_key: process.env.TWIT_KEY || 'empty',
-      consumer_secret: process.env.TWIT_SECRET || 'empty',
-      access_token_key: this.token,
-      access_token_secret: this.secret
-  });
 
+// Twitter API calls
+schema.methods.loadTimeline = function (twit, socket) {
   var query = {
     user_id: this.id,
     include_entities: true,
@@ -95,20 +89,52 @@ schema.methods.lookupOldTweets = function (socket) {
     console.log('tweets with pic: ', photoTweets.length);
 
     this.tweets = this.tweets.concat(photoTweets);
-
-    socket.emit('tweets', this.tweets);
     this.save();
-
   }.bind(this));
+};
+
+schema.methods.initHomeFeed = function (twit, socket) {
+  var query = {
+    user_id: this.id,
+    include_entities: true,
+    count: 200
+  };
+
+  twit.get('/statuses/home_timeline.json', query, function (data, res) {
+    if (res.statusCode !== 200) { 
+      return socket.emit('errorMessage', {error: 'error with /statuses/home_timeline.json'});
+    }
+    
+    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
+    
+    console.log('tweets found: ', data.length);
+    console.log('tweets with pic: ', photoTweets.length);
+
+    socket.emit('tweets', photoTweets);
+  });
+};
+
+schema.methods.listenToHomeStream = function (twit, socket) {
+  twit.stream('user', {}, function (stream) {
+    stream.on('data', function (data) {
+      if (filterPhotoTweets(data)) {
+        socket.emit('tweet', cleanTweet(data));
+      }
+    });
+  });
 };
 
 
 schema.methods.initFeed = function (socket) {
-  if (this.tweets.length === 0) {
-    this.lookupOldTweets(socket);
-  } else {
-    socket.emit('tweets', this.tweets);
-  }
+  var twit = new twitter({
+      consumer_key: process.env.TWIT_KEY || 'empty',
+      consumer_secret: process.env.TWIT_SECRET || 'empty',
+      access_token_key: this.token,
+      access_token_secret: this.secret
+  });
+
+  this.initHomeFeed(twit, socket);
+  this.listenToHomeStream(twit, socket);
 };
 
 

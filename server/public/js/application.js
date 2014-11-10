@@ -378,9 +378,11 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
   var socket = window.io.connect();
 
   vm.tweets = [];
+  vm.loadingText = 'fetching tweets...';
   
   socket.on('tweet', function (tweet) {
-    vm.tweets.push(tweet);
+    window.alert('new tweet');
+    vm.tweets.unshift(tweet);
     $rootScope.$digest();
   });
 
