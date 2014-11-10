@@ -4,10 +4,13 @@
     include ../common/spinner
     em.blue fetching tweets...
 
-  .margin-top-big(ng-hide="vm.tweets.length === 0")
-    h1 Your Feed
+  div(ng-hide="vm.tweets.length === 0")
+    a.button.blue.pull-right.margin(href="/logout") logout
     
-    .tweet(ng-repeat="tweet in vm.tweets")
-      img(ng-repeat="pic in tweet.pics" src="{{pic}}")
-      | RT: {{tweet.retweet_count}}
-      | FAV: {{tweet.favorite_count}}
+    .tweets
+      .tweet(ng-repeat="tweet in vm.tweets")
+        .tweet-images
+          .tweet-image(ng-repeat="pic in tweet.pics" style="background-image:url({{pic}})")
+        .tweet-info
+          | RT: {{tweet.retweet_count}}
+          | FAV: {{tweet.favorite_count}}
