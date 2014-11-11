@@ -17,6 +17,7 @@ module.exports = function (socket) {
   });
 
   socket.on('disconnect', function () {
+    if (!!user) { user.closeFeed(); }
     user = undefined;
   });
 };

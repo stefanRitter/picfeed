@@ -28,7 +28,9 @@ schema = mongoose.Schema({
     retweet_count:      Number,
     favorite_count:     Number,
     pics:               [String]
-  }]
+  }],
+
+  stream: mongoose.Schema.Types.Mixed
 });
 
 // helpers
@@ -116,16 +118,20 @@ schema.methods.initHomeFeed = function (twit, socket) {
 
 schema.methods.listenToHomeStream = function (twit, socket) {
   twit.stream('user', {}, function (stream) {
+    this.stream = stream;
+
     stream.on('data', function (data) {
       if (filterPhotoTweets(data)) {
         socket.emit('tweet', cleanTweet(data));
       }
     });
-  });
+  }.bind(this));
 };
 
 
 schema.methods.initFeed = function (socket) {
+  console.log('User: '+ this.displayName + ' connecting');
+  
   var twit = new twitter({
       consumer_key: process.env.TWIT_KEY || 'empty',
       consumer_secret: process.env.TWIT_SECRET || 'empty',
@@ -137,5 +143,13 @@ schema.methods.initFeed = function (socket) {
   this.listenToHomeStream(twit, socket);
 };
 
+schema.methods.closeFeed = function () {
+  console.log('User: '+ this.displayName + ' disconnected');
+  
+  if (!!this.stream) {
+    this.stream.destroy();
+    this.stream = undefined;
+  }
+};
 
 module.exports = mongoose.model('User', schema);
