@@ -39,6 +39,15 @@ module.exports = function (config, server) {
       file: 'html/index.html'
     }
   });
-  
+
+  // respond to Chrome pre-fetching
+  server.route({
+    method: 'GET',
+    path: '/%7B%7Btweet.profile_image_url%7D%7D',
+    handler: {
+      file: 'img/twitter.svg'
+    }
+  });
+
   return server;
 };
