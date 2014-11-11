@@ -1,7 +1,5 @@
-'use strict';
 /*jshint camelcase: false */
-
-//var User = require('mongoose').model('User'),
+'use strict';
 
 var Boom = require('boom'),
     server = {};
@@ -9,10 +7,10 @@ var Boom = require('boom'),
 var twitter = require('twitter');
 
 var twit = new twitter({
-    consumer_key: process.env.TWIT_KEY || 'empty',
-    consumer_secret: process.env.TWIT_SECRET || 'empty',
-    access_token_key: process.env.TWIT_TOKEN || 'empty',
-    access_token_secret: process.env.TWIT_TOKEN_SECRET || 'empty'
+    consumer_key:         process.env.TWIT_KEY          || 'testing',
+    consumer_secret:      process.env.TWIT_SECRET       || 'testing',
+    access_token_key:     process.env.TWIT_TOKEN        || 'testing',
+    access_token_secret:  process.env.TWIT_TOKEN_SECRET || 'testing'
 });
 
 function restTimeline (request, reply) {
@@ -28,7 +26,7 @@ function restTimeline (request, reply) {
     if (res.statusCode !== 200) { return reply(Boom.badImplementation('twitter code: '+res.statusCode)); }
 
     console.log('found: ', data.length);
-    reply(data.length);
+    reply(data);
   });
 }
 
