@@ -14,8 +14,8 @@ function loginTwitter (request, reply) {
     if (!user) { 
       var userToCreate = {
         id: userData.id,
-        username: userData.username,
-        displayName: userData.displayName,
+        username: userData.profile.username,
+        displayName: userData.profile.displayName,
         token: userData.token,
         secret: userData.secret
       };
