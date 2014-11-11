@@ -26934,7 +26934,7 @@ angular.module('app').config(function ($routeProvider, $locationProvider) {
 });
 
 
-angular.module('app').run(['$rootScope', '$location', function ($rootScope, $location) {
+angular.module('app').run(['$rootScope', '$location', 'currentUser', function ($rootScope, $location) {
   'use strict';
 
   $rootScope.$on('$routeChangeSuccess', function(){
