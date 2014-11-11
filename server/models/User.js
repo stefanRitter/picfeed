@@ -74,14 +74,40 @@ function filterPhotoTweets (tweet) {
 
 // Twitter API calls
 schema.methods.initHomeFeed = function (twit, socket) {
-  // TODO:
-  // if no tweets, call create
-  // if tweets send them and check if there are new ones since_id
-
   var query = {
     user_id: this.id,
     include_entities: true,
     count: 200
+  };
+
+  twit.get('/statuses/home_timeline.json', query, function (data, res) {
+    if (res.statusCode !== 200) { 
+      return socket.emit('errorMessage', {error: 'error with /statuses/home_timeline.json'});
+    }
+
+    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
+    
+    console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
+
+    socket.emit('tweets', photoTweets);
+
+    this.tweets   = this.tweets.concat(photoTweets);
+    this.since_id = data[0].id_str;
+    this.max_id   = data[data.length-1].id_str;
+    this.save();
+  
+  }.bind(this));
+};
+
+schema.methods.updateHomeFeed = function (twit, socket) {
+  // TODO:
+  // if tweets send them and check if there are new ones since_id
+
+  /*var query = {
+    user_id: this.id,
+    include_entities: true,
+    count: 200,
+    since_id: this.since_id
   };
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
@@ -99,7 +125,9 @@ schema.methods.initHomeFeed = function (twit, socket) {
     //this.max_id   = data[data.length-1].id_str;
     //this.tweets = this.tweets.concat(photoTweets);
     //this.save();
-  }.bind(this));
+  }.bind(this));*/
+
+  socket.emit('tweets', this.tweets);
 };
 
 schema.methods.listenToHomeStream = function (twit, socket) {
@@ -116,16 +144,21 @@ schema.methods.listenToHomeStream = function (twit, socket) {
 
 
 schema.methods.initFeed = function (socket) {
-  console.log('User: '+ this.displayName + ' connecting');
+  console.log('User: '+ this.displayName + ' connected');
   
   var twit = new twitter({
       consumer_key: process.env.TWIT_KEY || 'empty',
       consumer_secret: process.env.TWIT_SECRET || 'empty',
       access_token_key: this.token,
       access_token_secret: this.secret
-  });
+    });
 
-  this.initHomeFeed(twit, socket);
+  if (this.tweets.length === 0) {
+    this.initHomeFeed(twit, socket);
+  } else {
+    this.updateHomeFeed(twit, socket);
+  }
+
   this.listenToHomeStream(twit, socket);
 };
 
@@ -141,9 +174,9 @@ schema.methods.closeFeed = function () {
 schema.methods.paginateFeed = function (lastTweet, reply) {
   // TODO:
   // if there are some tweets left in memory, send those
-  // otherwise get some more from Twitter until we reach the limit of 8000
+  // otherwise get some more from Twitter
 
-  reply({});
+  reply(this.tweets);
 };
 
 module.exports = mongoose.model('User', schema);
