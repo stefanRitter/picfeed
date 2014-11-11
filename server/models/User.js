@@ -21,6 +21,7 @@ schema = mongoose.Schema({
   max_id:       String,
   
   tweets: [{
+    id_str:             String,
     created_at:         String,
     url:                String,
     profile_image_url:  String,
@@ -45,6 +46,7 @@ function cleanTweet (rawTweet) {
   }
 
   return {
+    id_str:             rawTweet.id_str,
     created_at:         rawTweet.created_at,
     url:                'http://twitter.com/'+rawTweet.user.id_str+'/status/'+rawTweet.id_str,
     profile_image_url:  profile_image_url,
@@ -144,7 +146,7 @@ schema.methods.initFeed = function (socket) {
 };
 
 schema.methods.closeFeed = function () {
-  console.log('User: '+ this.displayName + ' disconnected');
+  console.log('User: '+ this.displayName +' disconnected');
   
   if (!!this.stream) {
     this.stream.destroy();

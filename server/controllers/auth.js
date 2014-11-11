@@ -8,7 +8,7 @@ var User = require('mongoose').model('User'),
 function loginTwitter (request, reply) {
   var userData = request.auth.credentials;
 
-  User.findOne({id: userData.id}, function (err, user) {
+  User.findOne({_id: userData._id}, function (err, user) {
     if (err) { return reply(Boom.badImplementation(err)); }
 
     if (!user) { 
@@ -22,12 +22,12 @@ function loginTwitter (request, reply) {
 
       return User.create(userToCreate, function (err, newUser) {
         if (err || !newUser) { return reply(Boom.badImplementation(err)); }
-        request.auth.session.set({id: newUser.id});
+        request.auth.session.set({_id: newUser._id});
         reply.redirect('/feed');
       });
     }
 
-    request.auth.session.set({id: user.id});
+    request.auth.session.set({_id: user._id});
     reply.redirect('/feed');
   });
 }
@@ -38,9 +38,9 @@ function logout (request, reply) {
 }
 
 function retrieveSession (request, reply) {
-  User.findOne({id: request.auth.credentials.id}, function (err, user) {
+  User.findOne({_id: request.auth.credentials._id}, function (err, user) {
     if (err || !user) { return reply(Boom.badImplementation(err)); }
-    reply(user);
+    reply({_id: user._id});
   });
 }
 

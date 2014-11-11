@@ -3,6 +3,8 @@
 module.exports = function (config, server) {
   require('../controllers/auth.js')(server);
   
+  require('../controllers/feed.js')(server);
+
   require('../controllers/twitter.js')(server);
 
   server.route({
@@ -21,14 +23,6 @@ module.exports = function (config, server) {
     path: '/favicon.ico',
     handler: {
       file: 'img/favicon.ico'
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/feed',
-    handler: {
-      file: 'html/index.html'
     }
   });
 
