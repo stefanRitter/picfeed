@@ -26971,7 +26971,6 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
 
   var vm = this;
   var socket = window.io.connect();
-
   var handleError = function (error) {
     window.alert('an error occurred - please check console');
     console.log(error);

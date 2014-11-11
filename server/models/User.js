@@ -34,6 +34,7 @@ schema = mongoose.Schema({
   stream: mongoose.Schema.Types.Mixed
 });
 
+
 // helpers
 function cleanTweet (rawTweet) {
   var pics = rawTweet.extended_entities.media.map(function (e) {
@@ -72,32 +73,11 @@ function filterPhotoTweets (tweet) {
 
 
 // Twitter API calls
-schema.methods.loadTimeline = function (twit, socket) {
-  var query = {
-    user_id: this.id,
-    include_entities: true,
-    count: 200 // maximum
-  };
-
-  twit.get('/statuses/user_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) { 
-      return socket.emit('errorMessage', {error: 'error with /statuses/user_timeline.json'});
-    }
-    
-    this.since_id = data[0].id_str;
-    this.max_id   = data[data.length-1].id_str;
-
-    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
-    
-    console.log('tweets found: ', data.length);
-    console.log('tweets with pic: ', photoTweets.length);
-
-    this.tweets = this.tweets.concat(photoTweets);
-    this.save();
-  }.bind(this));
-};
-
 schema.methods.initHomeFeed = function (twit, socket) {
+  // TODO:
+  // if no tweets, call create
+  // if tweets send them and check if there are new ones since_id
+
   var query = {
     user_id: this.id,
     include_entities: true,
@@ -108,14 +88,18 @@ schema.methods.initHomeFeed = function (twit, socket) {
     if (res.statusCode !== 200) { 
       return socket.emit('errorMessage', {error: 'error with /statuses/home_timeline.json'});
     }
-    
+
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
     
-    console.log('tweets found: ', data.length);
-    console.log('tweets with pic: ', photoTweets.length);
+    console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
     socket.emit('tweets', photoTweets);
-  });
+    
+    //this.since_id = data[0].id_str;
+    //this.max_id   = data[data.length-1].id_str;
+    //this.tweets = this.tweets.concat(photoTweets);
+    //this.save();
+  }.bind(this));
 };
 
 schema.methods.listenToHomeStream = function (twit, socket) {
@@ -152,6 +136,14 @@ schema.methods.closeFeed = function () {
     this.stream.destroy();
     this.stream = undefined;
   }
+};
+
+schema.methods.paginateFeed = function (lastTweet, reply) {
+  // TODO:
+  // if there are some tweets left in memory, send those
+  // otherwise get some more from Twitter until we reach the limit of 8000
+
+  reply({});
 };
 
 module.exports = mongoose.model('User', schema);

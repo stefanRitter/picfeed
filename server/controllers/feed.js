@@ -9,8 +9,7 @@ function loadMoreTweets (request, reply) {
   User.findOne({_id: request.auth.credentials._id}, function (err, user) {
     if (err || !user) { return reply(Boom.badImplementation(err)); }
     
-    console.log(user);
-    reply({});
+    user.paginateFeed(request.params.lastTweet, reply);
   });
 }
 
