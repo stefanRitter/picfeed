@@ -6,6 +6,7 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
 
   vm.tweets = [];
   vm.loadingText = 'fetching tweets...';
+  vm.scrollTop = function () { window.scrollTo(0, 0); };
   
   socket.on('tweet', function (tweet) {
     vm.tweets.unshift(tweet);

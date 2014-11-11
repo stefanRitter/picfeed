@@ -379,6 +379,7 @@ angular.module('app').controller('feedController', ['$rootScope', 'currentUser',
 
   vm.tweets = [];
   vm.loadingText = 'fetching tweets...';
+  vm.scrollTop = function () { window.scrollTo(0, 0); };
   
   socket.on('tweet', function (tweet) {
     vm.tweets.unshift(tweet);
@@ -418,6 +419,10 @@ angular.module('app').directive('newTweetAlert', ['$rootScope', function ($rootS
     link: function ($scope) {
       var vm = $scope;
       vm.show = false;
+
+      vm.scrollTop = function () {
+        window.scrollTo(0, 0);
+      };
 
       $rootScope.$on('newTweet', function () {
         vm.show = true;

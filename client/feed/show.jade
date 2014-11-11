@@ -1,11 +1,11 @@
-.center(ng-controller="feedController as vm")  
+.center#top(ng-controller="feedController as vm")  
   
-  .margin-top-big(ng-show="vm.tweets.length === 0")
+  .margin-top-big(ng-show="vm.tweets.length <= 1")
     include ../common/spinner
     em.blue {{vm.loadingText}}
 
   div(ng-hide="vm.tweets.length === 0")
-    //a.totop-button.button.green(href="/logout") back to top
+    .totop-button.button.green(ng-click="vm.scrollTop()") back to top
     a.logout-button.button.red(href="/logout") log out
     
     .tweets

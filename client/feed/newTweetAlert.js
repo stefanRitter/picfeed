@@ -11,6 +11,10 @@ angular.module('app').directive('newTweetAlert', ['$rootScope', function ($rootS
       var vm = $scope;
       vm.show = false;
 
+      vm.scrollTop = function () {
+        window.scrollTo(0, 0);
+      };
+
       $rootScope.$on('newTweet', function () {
         vm.show = true;
       });

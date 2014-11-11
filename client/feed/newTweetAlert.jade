@@ -1,4 +1,4 @@
 .tweet-alert(ng-class="{'show': show}")
   .tweet-alert-close(ng-click="show = false; $event.preventDefault(); $event.stopPropagation();") &times;
-  .clickable.margin-top-sm.medium(ng-click="show = false; $event.preventDefault(); $event.stopPropagation();")
+  .clickable.margin-top-sm.medium(ng-click="show = false; scrollTop();")
     | You have a new tweet!
