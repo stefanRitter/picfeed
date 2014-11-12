@@ -26945,7 +26945,7 @@ angular.module('app').run(['$rootScope', '$location', 'currentUser', function ($
 angular.module('app').factory('currentUser', ['$location', '$http', '$rootScope', function ($location, $http, $rootScope) {
   'use strict';
 
-  var currentUser = {};
+  var currentUser;
 
   $http
     .get('/session', {})

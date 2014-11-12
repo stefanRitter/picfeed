@@ -1,7 +1,7 @@
 angular.module('app').factory('currentUser', ['$location', '$http', '$rootScope', function ($location, $http, $rootScope) {
   'use strict';
 
-  var currentUser = {};
+  var currentUser;
 
   $http
     .get('/session', {})
