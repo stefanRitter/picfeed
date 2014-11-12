@@ -4,7 +4,8 @@
 var mongoose = require('mongoose'),
     schema;
 
-var twitter = require('twitter');
+var twitter = require('twitter'),
+    Boom = require('boom');
 
 
 schema = mongoose.Schema({  
@@ -18,7 +19,6 @@ schema = mongoose.Schema({
   secret:       String,
 
   since_id:     String,
-  max_id:       String,
   
   tweets: [{
     id_str:             String,
@@ -73,6 +73,17 @@ function filterPhotoTweets (tweet) {
 
 
 // Twitter API calls
+schema.methods.getAPIAuth = function () {
+  var twit = new twitter({
+    consumer_key: process.env.TWIT_KEY || 'empty',
+    consumer_secret: process.env.TWIT_SECRET || 'empty',
+    access_token_key: this.token,
+    access_token_secret: this.secret
+  });
+
+  return twit;
+};
+
 schema.methods.initHomeFeed = function (twit, socket) {
   var query = {
     user_id: this.id,
@@ -89,11 +100,10 @@ schema.methods.initHomeFeed = function (twit, socket) {
     
     console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
-    socket.emit('tweets', photoTweets);
+    socket.emit('tweets', photoTweets.slice(0, 20));
 
     this.tweets   = this.tweets.concat(photoTweets);
     this.since_id = data[0].id_str;
-    this.max_id   = data[data.length-1].id_str;
     this.save();
   
   }.bind(this));
@@ -127,7 +137,7 @@ schema.methods.updateHomeFeed = function (twit, socket) {
     //this.save();
   }.bind(this));*/
 
-  socket.emit('tweets', this.tweets);
+  socket.emit('tweets', this.tweets.slice(0, 20));
 };
 
 schema.methods.listenToHomeStream = function (twit, socket) {
@@ -145,13 +155,8 @@ schema.methods.listenToHomeStream = function (twit, socket) {
 
 schema.methods.initFeed = function (socket) {
   console.log('User: '+ this.displayName + ' connected');
-  
-  var twit = new twitter({
-      consumer_key: process.env.TWIT_KEY || 'empty',
-      consumer_secret: process.env.TWIT_SECRET || 'empty',
-      access_token_key: this.token,
-      access_token_secret: this.secret
-    });
+
+  var twit = this.getAPIAuth();
 
   if (this.tweets.length === 0) {
     this.initHomeFeed(twit, socket);
@@ -159,7 +164,11 @@ schema.methods.initFeed = function (socket) {
     this.updateHomeFeed(twit, socket);
   }
 
-  this.listenToHomeStream(twit, socket);
+  try {
+    this.listenToHomeStream(twit, socket);
+  } catch (e) {
+    socket.emit('errorMessage', {error: 'error setting up stream', data: e});
+  }
 };
 
 schema.methods.closeFeed = function () {
@@ -171,12 +180,43 @@ schema.methods.closeFeed = function () {
   }
 };
 
-schema.methods.paginateFeed = function (lastTweet, reply) {
-  // TODO:
-  // if there are some tweets left in memory, send those
-  // otherwise get some more from Twitter
+schema.methods.paginateFeed = function (lastTweetId, reply) {
+  var index = 0;
+  this.tweets.forEach(function (e, i) {
+    if (e.id_str === lastTweetId) { index = i; }
+  });
 
-  reply(this.tweets);
+  var nextSlice = this.tweets.slice(index+1, index+10);
+
+  if (nextSlice.length > 0) {
+    return reply(nextSlice);
+  }
+
+  // we need more tweets from the past
+  var twit = this.getAPIAuth(),
+      max_id = this.tweets[this.tweets.length-1].id_str;
+
+  var query = {
+    user_id: this.id,
+    include_entities: true,
+    count: 200,
+    max_id: max_id
+  };
+
+  twit.get('/statuses/home_timeline.json', query, function (data, res) {
+    if (res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in paginateFeed')); }
+
+    data[0] = {}; // max_id duplicate
+    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
+    
+    console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
+
+    this.tweets = this.tweets.concat(photoTweets);
+    this.save(function () {
+      reply(this.tweets.slice(index+1, index+10));
+    }.bind(this));
+  
+  }.bind(this));
 };
 
 module.exports = mongoose.model('User', schema);

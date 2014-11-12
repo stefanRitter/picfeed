@@ -18,7 +18,7 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
     var lastTweet = vm.tweets[vm.tweets.length-1];
     vm.showLoadMore = false;
     $http
-      .get('/feed/next', {lastTweet: lastTweet.id_str})
+      .get('/feed/next?lastTweet='+lastTweet.id_str)
       .error(handleError)
       .success(function (res) {
         vm.tweets = vm.tweets.concat(res);
