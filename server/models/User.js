@@ -124,9 +124,10 @@ schema.methods.listenToStream = function (twit, socket) {
       if (filterPhotoTweets(data)) {
         var cleanedTweet = cleanTweet(data);
 
-        this.tweets.unshift(cleanTweet);
-        this.save();
-        socket.emit('tweet', cleanedTweet);
+        this.tweets.unshift(cleanedTweet);
+        this.save(function () {
+          socket.emit('tweet', cleanedTweet);
+        });
       }
     }.bind(this));
   }.bind(this));
