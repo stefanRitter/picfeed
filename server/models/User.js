@@ -188,8 +188,7 @@ schema.methods.updateFeed = function (reply, max_id) {
   }
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    console.log(data.length);
-    if (res.statusCode !== 200) { 
+    if (res.statusCode !== 200 && res.statusCode !== 429) {
       return reply(Boom.badImplementation('bad twitter response in updateFeed'));
     }
 
