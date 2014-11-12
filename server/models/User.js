@@ -5,8 +5,8 @@ var mongoose = require('mongoose'),
     schema;
 
 var twitter = require('twitter'),
-    Boom = require('boom');
-    //_ = require('lodash');
+    Boom = require('boom'),
+    _ = require('lodash');
 
 
 schema = mongoose.Schema({  
@@ -157,7 +157,7 @@ schema.methods.startFeed = function (reply) {
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
     if (res.statusCode !== 200) { 
-      return reply(Boom.badImplementation({error: 'bad twitter response in updateFeed', res: res}));
+      return reply(Boom.badImplementation('bad twitter response in startFeed'));
     }
 
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
@@ -174,11 +174,9 @@ schema.methods.startFeed = function (reply) {
 };
 
 schema.methods.updateFeed = function (reply, max_id) {
-  // TODO:
-  // query recursively using both since_id and max_id until update complete
-  /*
-  var twit = this.getAPIAuth(); */
+  // recursively query using both since_id and max_id until update complete
 
+  var twit = this.getAPIAuth();
   var query = {
     include_entities: true,
     count: 200,
@@ -189,22 +187,18 @@ schema.methods.updateFeed = function (reply, max_id) {
     query.max_id = max_id;
   }
 
-  console.log(query);
-  return reply(Boom.badImplementation('bad twitter response in updateFeed'));
-
-  /*twit.get('/statuses/home_timeline.json', query, function (data, res) {
+  twit.get('/statuses/home_timeline.json', query, function (data, res) {
+    console.log(data.length);
     if (res.statusCode !== 200) { 
-      console.log(res);
-      return reply(Boom.badImplementation({error: 'bad twitter response in updateFeed', res: res}));
+      return reply(Boom.badImplementation('bad twitter response in updateFeed'));
     }
 
-    if (data.length > 0) {
+    if (!!data && data.length > 1) {
       var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
       var allTweets = photoTweets.concat(this.tweets);
 
       this.tweets = _.sortBy(_.uniq(allTweets, 'id_str'), 'id_str').reverse();
       
-      // recursively get all tweets since since_id
       this.save(function () {
         this.updateFeed(reply, data[data.length-1].id_str);
       }.bind(this));
@@ -212,13 +206,13 @@ schema.methods.updateFeed = function (reply, max_id) {
       return;
     }
 
-    // no more new tweets
+    // no more new tweets - update since_id
     this.since_id = this.tweets[0].id_str;
     this.save();
 
     reply(this.tweets.slice(0, 20));
  
-  }.bind(this));*/
+  }.bind(this));
 };
 
 schema.methods.paginateFeed = function (lastTweetId, reply) {
