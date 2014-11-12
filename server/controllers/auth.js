@@ -13,7 +13,7 @@ function loginTwitter (request, reply) {
 
     if (!user) { 
       var userToCreate = {
-        id: userData.id,
+        id: userData.profile.id,
         username: userData.profile.username,
         displayName: userData.profile.displayName,
         token: userData.token,
@@ -39,7 +39,7 @@ function logout (request, reply) {
 
 function retrieveSession (request, reply) {
   User.findOne({_id: request.auth.credentials._id}, function (err, user) {
-    if (err || !user) { return reply(Boom.badImplementation(err)); }
+    if (err || !user) { return reply(Boom.unauthorized(err)); }
     reply({_id: user._id});
   });
 }
