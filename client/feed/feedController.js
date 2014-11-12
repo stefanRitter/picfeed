@@ -14,6 +14,8 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   vm.scrollTop = function () { window.scrollTo(0, 0); };
   vm.showLoadMore = true;
 
+
+  // REST API calls
   vm.loadMore = function () {
     var lastTweet = vm.tweets[vm.tweets.length-1];
     vm.showLoadMore = false;
@@ -26,8 +28,17 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
       });
   };
 
+  function refreshFeed () {
+    $http
+      .get('/feed/refresh')
+      .error(handleError)
+      .success(function (res) {
+        vm.tweets = res;
+      });
+  }
 
-  // setup socket listeners
+
+  // Stream API socket listeners
   socket.on('tweet', function (tweet) {
     vm.tweets.unshift(tweet);
     $rootScope.$emit('newTweet');
@@ -49,6 +60,7 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
 
   if (!!currentUser.get()) {
     socket.emit('currentUser', currentUser.get());
+    refreshFeed();
   }
 
   setTimeout(function () {

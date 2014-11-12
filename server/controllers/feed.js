@@ -14,6 +14,13 @@ function loadMoreTweets (request, reply) {
   });
 }
 
+function refreshTweets (request, reply) {
+  User.findOne({_id: request.auth.credentials._id}, function (err, user) {
+    if (err || !user) { return reply(Boom.badImplementation(err)); }
+    
+    user.refreshFeed(reply);
+  });
+}
 
 module.exports = function (_server) {
   server = _server;
@@ -35,6 +42,14 @@ module.exports = function (_server) {
       config: {
         auth: 'session',
         handler: loadMoreTweets,
+      }
+    },
+    {
+      method: 'GET',
+      path: '/feed/refresh',
+      config: {
+        auth: 'session',
+        handler: refreshTweets,
       }
     }
   ]

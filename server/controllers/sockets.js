@@ -12,12 +12,12 @@ module.exports = function (socket) {
       }
 
       user = foundUser;
-      user.initFeed(socket);
+      user.initStream(socket);
     });
   });
 
   socket.on('disconnect', function () {
-    if (!!user) { user.closeFeed(); }
+    if (!!user) { user.closeStream(); }
     user = undefined;
   });
 };

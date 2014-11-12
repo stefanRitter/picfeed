@@ -6,6 +6,7 @@ var mongoose = require('mongoose'),
 
 var twitter = require('twitter'),
     Boom = require('boom');
+    //_ = require('lodash');
 
 
 schema = mongoose.Schema({  
@@ -92,23 +93,24 @@ schema.methods.getAPIAuth = function () {
   return twit;
 };
 
-schema.methods.initFeed = function (socket) {
-  console.log('User: '+ this.displayName + ' connected');
 
+// Streams
+schema.methods.initStream = function (socket) {
   var twit = this.getAPIAuth();
-
-  this.startFeed(twit, socket);
+  this.tweets = this.tweets || [];
 
   try {
     this.listenToStream(twit, socket);
+    console.log('User: '+ this.displayName + ' connected');
   } catch (e) {
     socket.emit('errorMessage', {error: 'error setting up stream', data: e});
   }
+
+  // socket.emit('tweets', this.tweets.slice(0, 20));
 };
 
-schema.methods.closeFeed = function () {
+schema.methods.closeStream = function () {
   console.log('User: '+ this.displayName +' disconnected');
-  console.log(this.stream.destroy);
 
   if (!!this.stream) {
     this.stream.destroy();
@@ -133,55 +135,90 @@ schema.methods.listenToStream = function (twit, socket) {
   }.bind(this));
 };
 
-schema.methods.startFeed = function (twit, socket) {
+
+// REST
+schema.methods.refreshFeed = function (reply) {
+  this.tweets = this.tweets || [];
+
   if (this.tweets.length > 0) {
-    return socket.emit('tweets', this.tweets.slice(0, 20));
+    this.updateFeed(reply);
+  } else {
+    this.startFeed(reply);
   }
+};
+
+schema.methods.startFeed = function (reply) {
+  var twit = this.getAPIAuth();
 
   var query = {
-    user_id: this.id,
     include_entities: true,
     count: 200
   };
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
     if (res.statusCode !== 200) { 
-      return socket.emit('errorMessage', {error: 'error with /statuses/home_timeline.json'});
+      return reply(Boom.badImplementation({error: 'bad twitter response in updateFeed', res: res}));
     }
 
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
     
     console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
-    socket.emit('tweets', photoTweets.slice(0, 20));
-
     this.tweets   = this.tweets.concat(photoTweets);
     this.since_id = data[0].id_str;
     this.save();
+    
+    reply(this.tweets.slice(0, 20));
   
   }.bind(this));
 };
 
-schema.methods.updateFeed = function (reply) {
+schema.methods.updateFeed = function (reply, max_id) {
   // TODO:
-  // use since_id to get all tweets since last visit
-  // smart merge with existing tweets removing dubs
-
-  var twit = this.getAPIAuth();
+  // query recursively using both since_id and max_id until update complete
+  /*
+  var twit = this.getAPIAuth(); */
 
   var query = {
-    user_id: this.id,
     include_entities: true,
     count: 200,
     since_id: this.since_id
   };
 
-  twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in updateFeed')); }
+  if (!!max_id) {
+    query.max_id = max_id;
+  }
+
+  console.log(query);
+  return reply(Boom.badImplementation('bad twitter response in updateFeed'));
+
+  /*twit.get('/statuses/home_timeline.json', query, function (data, res) {
+    if (res.statusCode !== 200) { 
+      console.log(res);
+      return reply(Boom.badImplementation({error: 'bad twitter response in updateFeed', res: res}));
+    }
+
+    if (data.length > 0) {
+      var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
+      var allTweets = photoTweets.concat(this.tweets);
+
+      this.tweets = _.sortBy(_.uniq(allTweets, 'id_str'), 'id_str').reverse();
+      
+      // recursively get all tweets since since_id
+      this.save(function () {
+        this.updateFeed(reply, data[data.length-1].id_str);
+      }.bind(this));
+
+      return;
+    }
+
+    // no more new tweets
+    this.since_id = this.tweets[0].id_str;
+    this.save();
 
     reply(this.tweets.slice(0, 20));
-
-  }.bind(this));
+ 
+  }.bind(this));*/
 };
 
 schema.methods.paginateFeed = function (lastTweetId, reply) {
@@ -201,7 +238,6 @@ schema.methods.paginateFeed = function (lastTweetId, reply) {
       max_id = this.tweets[this.tweets.length-1].id_str;
 
   var query = {
-    user_id: this.id,
     include_entities: true,
     count: 200,
     max_id: max_id
