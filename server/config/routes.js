@@ -5,8 +5,6 @@ module.exports = function (config, server) {
   
   require('../controllers/feed.js')(server);
 
-  require('../controllers/twitter.js')(server);
-
   server.route({
     method: 'GET',
     path: '/assets/{param*}',
