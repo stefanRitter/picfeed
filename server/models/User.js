@@ -34,6 +34,14 @@ schema = mongoose.Schema({
   stream: mongoose.Schema.Types.Mixed
 });
 
+// don't store more than 4000 tweets
+schema.pre('save', function (next) {
+  if (this.tweets.length > 4000) {
+    this.tweets = this.tweets.slice(0, 4000);
+  }
+  next();
+});
+
 
 // helpers
 function cleanTweet (rawTweet) {
@@ -84,7 +92,51 @@ schema.methods.getAPIAuth = function () {
   return twit;
 };
 
-schema.methods.initHomeFeed = function (twit, socket) {
+schema.methods.initFeed = function (socket) {
+  console.log('User: '+ this.displayName + ' connected');
+
+  var twit = this.getAPIAuth();
+
+  this.startFeed(twit, socket);
+
+  try {
+    this.listenToStream(twit, socket);
+  } catch (e) {
+    socket.emit('errorMessage', {error: 'error setting up stream', data: e});
+  }
+};
+
+schema.methods.closeFeed = function () {
+  console.log('User: '+ this.displayName +' disconnected');
+  console.log(this.stream.destroy);
+
+  if (!!this.stream) {
+    this.stream.destroy();
+    this.stream = undefined;
+  }
+};
+
+schema.methods.listenToStream = function (twit, socket) {
+  twit.stream('user', {}, function (stream) {
+    this.stream = stream;
+
+    stream.on('data', function (data) {
+      if (filterPhotoTweets(data)) {
+        var cleanedTweet = cleanTweet(data);
+
+        this.tweets.unshift(cleanTweet);
+        this.save();
+        socket.emit('tweet', cleanedTweet);
+      }
+    }.bind(this));
+  }.bind(this));
+};
+
+schema.methods.startFeed = function (twit, socket) {
+  if (this.tweets.length > 0) {
+    return socket.emit('tweets', this.tweets.slice(0, 20));
+  }
+
   var query = {
     user_id: this.id,
     include_entities: true,
@@ -109,11 +161,10 @@ schema.methods.initHomeFeed = function (twit, socket) {
   }.bind(this));
 };
 
-schema.methods.updateHomeFeed = function (twit, socket) {
-  // TODO:
-  // if tweets send them and check if there are new ones since_id
+schema.methods.updateFeed = function (reply) {
+  var twit = this.getAPIAuth();
 
-  /*var query = {
+  var query = {
     user_id: this.id,
     include_entities: true,
     count: 200,
@@ -121,63 +172,21 @@ schema.methods.updateHomeFeed = function (twit, socket) {
   };
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) { 
-      return socket.emit('errorMessage', {error: 'error with /statuses/home_timeline.json'});
-    }
+    if (res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in updateFeed')); }
 
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
     
     console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
-    socket.emit('tweets', photoTweets);
-    
-    //this.since_id = data[0].id_str;
-    //this.max_id   = data[data.length-1].id_str;
+    this.since_id = data[0].id_str;
+    this.max_id   = data[data.length-1].id_str;
     //this.tweets = this.tweets.concat(photoTweets);
-    //this.save();
-  }.bind(this));*/
-
-  socket.emit('tweets', this.tweets.slice(0, 20));
-};
-
-schema.methods.listenToHomeStream = function (twit, socket) {
-  twit.stream('user', {}, function (stream) {
-    this.stream = stream;
-
-    stream.on('data', function (data) {
-      if (filterPhotoTweets(data)) {
-        socket.emit('tweet', cleanTweet(data));
-      }
+    
+    this.save(function () {
+      reply(this.tweets.slice(0, 20));
     });
+
   }.bind(this));
-};
-
-
-schema.methods.initFeed = function (socket) {
-  console.log('User: '+ this.displayName + ' connected');
-
-  var twit = this.getAPIAuth();
-
-  if (this.tweets.length === 0) {
-    this.initHomeFeed(twit, socket);
-  } else {
-    this.updateHomeFeed(twit, socket);
-  }
-
-  try {
-    this.listenToHomeStream(twit, socket);
-  } catch (e) {
-    socket.emit('errorMessage', {error: 'error setting up stream', data: e});
-  }
-};
-
-schema.methods.closeFeed = function () {
-  console.log('User: '+ this.displayName +' disconnected');
-  
-  if (!!this.stream) {
-    this.stream.destroy();
-    this.stream = undefined;
-  }
 };
 
 schema.methods.paginateFeed = function (lastTweetId, reply) {
