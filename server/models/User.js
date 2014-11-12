@@ -163,6 +163,10 @@ schema.methods.startFeed = function (twit, socket) {
 };
 
 schema.methods.updateFeed = function (reply) {
+  // TODO:
+  // use since_id to get all tweets since last visit
+  // smart merge with existing tweets removing dubs
+
   var twit = this.getAPIAuth();
 
   var query = {
@@ -175,17 +179,7 @@ schema.methods.updateFeed = function (reply) {
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
     if (res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in updateFeed')); }
 
-    var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
-    
-    console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
-
-    this.since_id = data[0].id_str;
-    this.max_id   = data[data.length-1].id_str;
-    //this.tweets = this.tweets.concat(photoTweets);
-    
-    this.save(function () {
-      reply(this.tweets.slice(0, 20));
-    });
+    reply(this.tweets.slice(0, 20));
 
   }.bind(this));
 };
