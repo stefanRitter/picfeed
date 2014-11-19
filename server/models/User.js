@@ -152,7 +152,7 @@ schema.methods.startFeed = function (reply) {
 
   var query = {
     include_entities: true,
-    count: 200
+    count: 100
   };
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
