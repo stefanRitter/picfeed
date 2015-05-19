@@ -175,7 +175,8 @@ schema.methods.startFeed = function (reply) {
 
 schema.methods.updateFeed = function (reply, max_id, count) {
   // recursively query using both since_id and max_id until update complete
-  var count = count || 0;
+  count = count || 0;
+
   var twit = this.getAPIAuth();
   var query = {
     include_entities: true,
