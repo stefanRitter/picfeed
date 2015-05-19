@@ -157,6 +157,10 @@ schema.methods.startFeed = function (reply) {
 
   twit.get('/statuses/home_timeline.json', query, function (err, data, res) {
     if (res.statusCode !== 200 || !!err) {
+      if (this.tweets.length > 0) {
+        reply(this.tweets.slice(0, 20));
+        return;
+      }
       return reply(Boom.badImplementation('bad twitter response in startFeed'));
     }
 
