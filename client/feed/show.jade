@@ -23,6 +23,5 @@
               img(src="/assets/img/fav.png")
               | {{tweet.favorite_count}}
 
-    .clear-both.padding
-    .left.margin-left
+    .loadmore-button
       .button.medium.gray(ng-click="vm.loadMore()" ng-show="vm.showLoadMore") load more
