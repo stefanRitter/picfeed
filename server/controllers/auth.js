@@ -11,7 +11,7 @@ function loginTwitter (request, reply) {
   User.findOne({_id: userData._id}, function (err, user) {
     if (err) { return reply(Boom.badImplementation(err)); }
 
-    if (!user) { 
+    if (!user) {
       var userToCreate = {
         id: userData.profile.id,
         username: userData.profile.username,
@@ -33,8 +33,11 @@ function loginTwitter (request, reply) {
 }
 
 function logout (request, reply) {
-  request.auth.session.clear();
-  return reply.redirect('/');
+  User.findOne({_id: request.auth.credentials._id}, function (err, user) {
+    if (!err && !!user) { user.closeStream(); }
+    request.auth.session.clear();
+    return reply.redirect('/');
+  });
 }
 
 function retrieveSession (request, reply) {
