@@ -27033,6 +27033,11 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   setTimeout(function () {
     vm.loadingText = 'Wow, so many images! Almost ready...';
     $rootScope.$digest();
+    setTimeout(function () {
+      if (vm.tweets.length === 0) {
+        location.reload(true);
+      }
+    }, 1000);
   }, 8400/2);
 }]);
 
