@@ -34,7 +34,7 @@ function loginTwitter (request, reply) {
 
 function logout (request, reply) {
   User.findOne({_id: request.auth.credentials._id}, function (err, user) {
-    if (!err && !!user) { user.closeStream(); }
+    if (!!user) { user.closeStream(); }
     request.auth.session.clear();
     return reply.redirect('/');
   });
