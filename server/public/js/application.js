@@ -27020,12 +27020,12 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   setTimeout(function () {
     vm.loadingText = 'Wow, so many images! Almost ready...';
     $rootScope.$digest();
-    setTimeout(function () {
-      if (vm.tweets.length === 0) {
-        location.reload(true);
-      }
-    }, 1000);
-  }, 8400/2);
+  }, 5000);
+
+  setTimeout(function () {
+    vm.loadingText = 'OK looks like the server is very busy, try reloading the page...';
+    $rootScope.$digest();
+  }, 8400);
 }]);
 
 angular.module('app').directive('newTweetAlert', ['$rootScope', function ($rootScope) {
