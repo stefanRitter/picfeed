@@ -26980,8 +26980,6 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   vm.scrollTop = function () { window.scrollTo(0, 0); };
   vm.showLoadMore = true;
 
-
-  // REST API calls
   vm.loadMore = function () {
     var lastTweet = vm.tweets[vm.tweets.length-1];
     vm.showLoadMore = false;
