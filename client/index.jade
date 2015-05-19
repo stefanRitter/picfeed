@@ -2,9 +2,10 @@ doctype
 html(lang="en", itemtype="http://schema.org/WebPage" itemscope ng-app="app")
 
   include common/_head
-  
+
   body
     div(ng-view)
+      <div class="center ng-scope"><div class="margin-top-big"><h1 class="margin-top bold"><img src="/assets/img/icon.png" style="height:1.5em;"><br>PicFeed</h1><h2>Follow Twitter by Images.</h2><div class="phone-width center-block"><a href="#" target="_self" style="display:block;" class="blue login-button margin-top-big"><span>loading app ...</span></a></div><div class="credit"><a href="https://twitter.com/stefanritter">thanks for trying PicFeed ♥ @stefanritter</a></div></div></div>
     div(new-tweet-alert)
 
     include common/_scripts
