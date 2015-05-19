@@ -1,2 +1,0 @@
-#!/bin/sh
-curl "http://s3.amazonaws.com/alexa-static/top-1m.csv.zip" -o "temp.zip";unzip temp.zip;for URL in `head -100 top-1m.csv | sed -n 's/^.*,//p'`;do echo $URL;HEADER=$(curl -# -L -D - "$URL" -o null | grep -i Cache-Control | tail -1);if [ -z "$HEADER" ];then echo "$URL,'Cache-Control: private'" >> top100cache.csv;else HEADER=$(echo $HEADER | tr -d ' \t\n\r');echo "$URL,'$HEADER'" >> top100cache.csv;fi;done;rm null;rm top-1m.csv;rm temp.zip;
