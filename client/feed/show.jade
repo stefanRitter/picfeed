@@ -1,13 +1,13 @@
-.center#top(ng-controller="feedController as vm")  
-  
+.center#top(ng-controller="feedController as vm")
+
   .margin-top-big(ng-show="vm.tweets.length <= 1")
     include ../common/spinner
     em.blue {{vm.loadingText}}
 
   div(ng-hide="vm.tweets.length === 0")
     .totop-button.button.green(ng-click="vm.scrollTop()") back to top
-    a.logout-button.button.red(href="/logout") log out
-    
+    a.logout-button.button.red(href="/logout" target="_self") log out
+
     .tweets
       a.tweet(ng-repeat="tweet in vm.tweets" href="{{tweet.url}}" target="_blank")
         .tweet-images
@@ -22,7 +22,7 @@
             .tweet-likes
               img(src="/assets/img/fav.png")
               | {{tweet.favorite_count}}
-    
+
     .clear-both.padding
     .left.margin-left
       .button.medium.gray(ng-click="vm.loadMore()" ng-show="vm.showLoadMore") load more
