@@ -3,7 +3,6 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   'use strict';
 
   var vm = this;
-  var socket = window.io.connect();
   var handleError = function (error) {
     window.alert('an error occurred - please check console');
     console.log(error);
@@ -37,8 +36,7 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
       });
   }
 
-
-  // Stream API socket listeners
+  /*// Stream API socket listeners
   socket.on('tweet', function (tweet) {
     vm.tweets.unshift(tweet);
     $rootScope.$emit('newTweet');
@@ -48,18 +46,9 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   socket.on('tweets', function (tweets) {
     vm.tweets = vm.tweets.concat(tweets);
     $rootScope.$digest();
-  });
-
-  socket.on('errorMessage', handleError);
-
-
-  // tell server we are ready to receive tweets
-  $rootScope.$on('userLoggedIn', function () {
-    socket.emit('currentUser', currentUser.get());
-  });
+  });*/
 
   if (!!currentUser.get()) {
-    //socket.emit('currentUser', currentUser.get());
     refreshFeed();
   }
 

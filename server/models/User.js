@@ -106,7 +106,7 @@ schema.methods.initStream = function (socket) {
     socket.emit('errorMessage', {error: 'error setting up stream', data: e});
   }
 
-  // socket.emit('tweets', this.tweets.slice(0, 20));
+  socket.emit('tweets', this.tweets.slice(0, 20));
 };
 
 schema.methods.closeStream = function () {
@@ -246,7 +246,9 @@ schema.methods.paginateFeed = function (lastTweetId, reply) {
   };
 
   twit.get('/statuses/home_timeline.json', query, function (err, data, res) {
-    if (!!err || res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in paginateFeed')); }
+    if (!!err || res.statusCode !== 200) {
+      return reply([]);
+    }
 
     data[0] = {}; // max_id duplicate
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
