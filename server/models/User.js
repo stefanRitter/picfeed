@@ -9,7 +9,7 @@ var twitter = require('twitter'),
     _ = require('lodash');
 
 
-schema = mongoose.Schema({  
+schema = mongoose.Schema({
   id: {
     type:  String,
     index: true
@@ -20,7 +20,7 @@ schema = mongoose.Schema({
   secret:       String,
 
   since_id:     String,
-  
+
   tweets: [{
     id_str:             String,
     created_at:         String,
@@ -156,26 +156,26 @@ schema.methods.startFeed = function (reply) {
   };
 
   twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) { 
+    if (res.statusCode !== 200) {
       return reply(Boom.badImplementation('bad twitter response in startFeed'));
     }
 
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
-    
+
     console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
     this.tweets   = this.tweets.concat(photoTweets);
     this.since_id = data[0].id_str;
     this.save();
-    
+
     reply(this.tweets.slice(0, 20));
-  
+
   }.bind(this));
 };
 
-schema.methods.updateFeed = function (reply, max_id) {
+schema.methods.updateFeed = function (reply, max_id, count) {
   // recursively query using both since_id and max_id until update complete
-
+  var count = count || 0;
   var twit = this.getAPIAuth();
   var query = {
     include_entities: true,
@@ -192,14 +192,14 @@ schema.methods.updateFeed = function (reply, max_id) {
       return reply(Boom.badImplementation('bad twitter response in updateFeed'));
     }
 
-    if (!!data && data.length > 1) {
+    if (!!data && data.length > 1 && count < 3) {
       var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
       var allTweets = photoTweets.concat(this.tweets);
 
       this.tweets = _.sortBy(_.uniq(allTweets, 'id_str'), 'id_str').reverse();
-      
+
       this.save(function () {
-        this.updateFeed(reply, data[data.length-1].id_str);
+        this.updateFeed(reply, data[data.length-1].id_str, count++);
       }.bind(this));
 
       return;
@@ -210,7 +210,7 @@ schema.methods.updateFeed = function (reply, max_id) {
     this.save();
 
     reply(this.tweets.slice(0, 20));
- 
+
   }.bind(this));
 };
 
@@ -241,14 +241,14 @@ schema.methods.paginateFeed = function (lastTweetId, reply) {
 
     data[0] = {}; // max_id duplicate
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
-    
+
     console.log('tweets found: ', data.length, ' tweets with pic: ', photoTweets.length);
 
     this.tweets = this.tweets.concat(photoTweets);
     this.save(function () {
       reply(this.tweets.slice(index+1, index+10));
     }.bind(this));
-  
+
   }.bind(this));
 };
 
