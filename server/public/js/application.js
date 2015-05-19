@@ -27026,7 +27026,7 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   });
 
   if (!!currentUser.get()) {
-    socket.emit('currentUser', currentUser.get());
+    //socket.emit('currentUser', currentUser.get());
     refreshFeed();
   }
 

@@ -8,7 +8,7 @@ module.exports = function (config, server) {
 
   io = socketIo(server.listener);
 
-  io.on('connection', controller);
+  //io.on('connection', controller);
 
   return server;
 };
