@@ -31,7 +31,7 @@
     "negotiator": "^0.4.7",
     "node-env-file": "^0.1.4",
     "socket.io": "^1.2.0",
-    "twitter": "^0.2.13"
+    "twitter": "1.2.5"
   },
   "devDependencies": {
     "lab": "^4.0.1",

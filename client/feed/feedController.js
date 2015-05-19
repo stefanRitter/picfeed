@@ -66,6 +66,5 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   setTimeout(function () {
     vm.loadingText = 'Wow, so many images! Almost ready...';
     $rootScope.$digest();
-    setTimeout(window.reload, 200);
   }, 8400/2);
 }]);

@@ -155,8 +155,8 @@ schema.methods.startFeed = function (reply) {
     count: 100
   };
 
-  twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) {
+  twit.get('/statuses/home_timeline.json', query, function (err, data, res) {
+    if (res.statusCode !== 200 || !!err) {
       return reply(Boom.badImplementation('bad twitter response in startFeed'));
     }
 
@@ -188,8 +188,8 @@ schema.methods.updateFeed = function (reply, max_id, count) {
     query.max_id = max_id;
   }
 
-  twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200 && res.statusCode !== 429) {
+  twit.get('/statuses/home_timeline.json', query, function (err, data, res) {
+    if (!!err || res.statusCode !== 200 && res.statusCode !== 429) {
       return reply(Boom.badImplementation('bad twitter response in updateFeed'));
     }
 
@@ -237,8 +237,8 @@ schema.methods.paginateFeed = function (lastTweetId, reply) {
     max_id: max_id
   };
 
-  twit.get('/statuses/home_timeline.json', query, function (data, res) {
-    if (res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in paginateFeed')); }
+  twit.get('/statuses/home_timeline.json', query, function (err, data, res) {
+    if (!!err || res.statusCode !== 200) { return reply(Boom.badImplementation('bad twitter response in paginateFeed')); }
 
     data[0] = {}; // max_id duplicate
     var photoTweets = data.filter(filterPhotoTweets).map(cleanTweet);
