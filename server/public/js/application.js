@@ -27025,7 +27025,7 @@ angular.module('app').controller('feedController', ['$http', '$rootScope', 'curr
   setTimeout(function () {
     vm.loadingText = 'OK looks like the server is very busy, try reloading the page...';
     $rootScope.$digest();
-  }, 8400);
+  }, 10000);
 }]);
 
 angular.module('app').directive('newTweetAlert', ['$rootScope', function ($rootScope) {
