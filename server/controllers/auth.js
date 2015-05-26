@@ -8,7 +8,7 @@ var User = require('mongoose').model('User'),
 function loginTwitter (request, reply) {
   var userData = request.auth.credentials;
 
-  User.findOne({_id: userData._id}, function (err, user) {
+  User.findOne({id: userData.id}, function (err, user) {
     if (err) { return reply(Boom.badImplementation(err)); }
 
     if (!user) {
